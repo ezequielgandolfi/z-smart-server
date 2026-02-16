@@ -163,6 +163,21 @@ uninstall_app() {
     fi
 }
 
+restart_app() {
+    if [[ "$OSTYPE" != "linux-gnu"* ]]; then
+        log_warn "Only supported on Linux."
+        return
+    fi
+
+    log_info "Restarting Z Smart Server..."
+    sudo systemctl restart z-smart-server
+    if [ $? -eq 0 ]; then
+        log_info "Restarted successfully."
+    else
+        log_error "Failed to restart service."
+    fi
+}
+
 manage_service() {
     if [[ "$OSTYPE" != "linux-gnu"* ]]; then
         log_warn "Only supported on Linux."
@@ -253,6 +268,15 @@ while true; do
     else
         opt_service=-1
     fi
+
+    # Option 4: Restart App
+    if [ -n "$INSTALL_DIR" ] && [[ "$OSTYPE" == "linux-gnu"* ]]; then
+        echo "$i) Restart App"
+        opt_restart=$i
+        ((i++))
+    else
+        opt_restart=-1
+    fi
     
     echo "$i) Exit"
     opt_exit=$i
@@ -264,6 +288,7 @@ while true; do
     elif [ "$choice" == "$opt_update" ]; then update_app;
     elif [ "$choice" == "$opt_uninstall" ]; then uninstall_app;
     elif [ "$choice" == "$opt_service" ]; then manage_service;
+    elif [ "$choice" == "$opt_restart" ]; then restart_app;
     elif [ "$choice" == "$opt_exit" ]; then break;
     else echo "Invalid choice."; fi
 done
